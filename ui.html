@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 0;
+    margin: 0;
+    color: #333;
+    user-select: none;
+    /* Block selection globally */
+  }
+
+  input,
+  select {
+    user-select: text;
+    /* Allow selection in inputs */
+  }
+
+  #plugin-container {
+    padding: 16px 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .input-group label {
+    font-weight: 500;
+    color: #666;
+  }
+
+  .checkbox-group {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px !important;
+  }
+  .checkbox-group label,
+  input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  input[type="number"] {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    -moz-appearance: textfield;
+    /* Firefox */
+  }
+
+  /* Hide spinners for Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    --p: 0%;
+    /* Dynamic fill percentage */
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #18a0fb var(--p), #e6e6e6 var(--p));
+    border-radius: 2px;
+    border: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #18a0fb;
+    cursor: pointer;
+    margin-top: -5px;
+    /* (14 - 4) / 2 = 5 */
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="%23666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 6px;
+    padding-right: 30px !important;
+    cursor: pointer;
+    background-color: white;
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  button.primary {
+    background: #18A0FB;
+    color: white;
+  }
+
+  button.primary:hover {
+    background: #0D8DE2;
+  }
+
+  button.secondary:hover {
+    background: #f5f5f5;
+  }
+
+  #reset-btn {
+    background: white;
+    border: 1px solid #ccc;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    padding: 0;
+    cursor: pointer;
+    color: #666;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+  }
+
+  #reset-btn:hover {
+    color: #333;
+    background: #f5f5f5;
+    border-color: #999;
+  }
+</style>
+</head>
+
+<body>
+  <div id="plugin-container">
+    <h2>Sticker</h2>
+
+    <div class="input-group">
+      <label for="thickness">Border Thickness</label>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <input id="thickness-slider" type="range" value="12" min="2" max="64" style="flex: 1; cursor: pointer;">
+        <input id="thickness" type="number" value="12" min="2" max="64" style="width: 44px; text-align: center;">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="style">Style</label>
+      <select id="style"
+        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 13px;">
+        <option value="modern">Modern</option>
+        <option value="retro">Retro</option>
+        <option value="holographic">Holographic</option>
+        <option value="neon">Neon Glow</option>
+        <option value="gold">Gold Foil</option>
+      </select>
+    </div>
+
+    <div class="input-group checkbox-group" id="shadow-group">
+      <label for="shadow">Add Shadow</label>
+      <input id="shadow" type="checkbox" checked style="margin: 0; cursor: pointer;">
+    </div>
+
+    <div class="input-group" id="shadow-blur-group">
+      <label for="shadow-blur">Shadow Blur</label>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <input id="shadow-blur-slider" type="range" value="10" min="0" max="40" style="flex: 1; cursor: pointer;">
+        <input id="shadow-blur" type="number" value="10" min="0" max="40" style="width: 44px; text-align: center;">
+      </div>
+    </div>
+
+    <div class="input-group" id="opacity-group" style="display: none;">
+      <label for="opacity">Fade Opacity (%)</label>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <input id="opacity-slider" type="range" value="24" min="0" max="100" style="flex: 1; cursor: pointer;">
+        <input id="opacity" type="number" value="24" min="0" max="100" style="width: 44px; text-align: center;">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="reset-btn" title="Reset to Defaults">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+      </button>
+      <button id="create" class="primary" style="flex: 1;">Create</button>
+    </div>
+  </div>
+
+  <script>
+    const styleSelect = document.getElementById('style');
+    const shadowGroup = document.getElementById('shadow-group');
+    const shadowBlurGroup = document.getElementById('shadow-blur-group');
+    const shadowCheckbox = document.getElementById('shadow');
+    const shadowBlurInput = document.getElementById('shadow-blur');
+    const shadowBlurSlider = document.getElementById('shadow-blur-slider');
+    const opacityGroup = document.getElementById('opacity-group');
+    const opacityInput = document.getElementById('opacity');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const thicknessInput = document.getElementById('thickness');
+    const thicknessSlider = document.getElementById('thickness-slider');
+
+    function updateSliderFill(slider) {
+      const min = slider.min || 0;
+      const max = slider.max || 100;
+      const val = slider.value;
+      const percentage = (val - min) / (max - min) * 100;
+      // Set CSS variable for the pseudo-element track to use
+      slider.style.setProperty('--p', `${percentage}%`);
+    }
+
+    // Sync sliders and number inputs
+    thicknessSlider.addEventListener('input', (e) => {
+      thicknessInput.value = e.target.value;
+      updateSliderFill(e.target);
+    });
+    thicknessInput.addEventListener('input', (e) => {
+      thicknessSlider.value = e.target.value;
+      updateSliderFill(thicknessSlider);
+    });
+
+    opacitySlider.addEventListener('input', (e) => {
+      opacityInput.value = e.target.value;
+      updateSliderFill(e.target);
+    });
+    opacityInput.addEventListener('input', (e) => {
+      opacitySlider.value = e.target.value;
+      updateSliderFill(opacitySlider);
+    });
+
+    shadowBlurSlider.addEventListener('input', (e) => {
+      shadowBlurInput.value = e.target.value;
+      updateSliderFill(e.target);
+    });
+    shadowBlurInput.addEventListener('input', (e) => {
+      shadowBlurSlider.value = e.target.value;
+      updateSliderFill(shadowBlurSlider);
+    });
+
+    // Initialize fills
+    updateSliderFill(thicknessSlider);
+    updateSliderFill(opacitySlider);
+    updateSliderFill(shadowBlurSlider);
+
+    let resizeTimer = null;
+
+    function resizeUI() {
+      // Debounce: cancel any pending resize and wait for DOM to fully settle
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const container = document.getElementById('plugin-container');
+        // Force a synchronous reflow by reading a layout property
+        void container.offsetHeight;
+        const height = container.offsetHeight;
+        parent.postMessage({ pluginMessage: { type: 'resize', height: height } }, '*');
+      }, 50);
+    }
+
+    function updateVisibility() {
+      const style = styleSelect.value;
+      const shadowEnabled = shadowCheckbox.checked;
+
+      // Shadow visibility
+      if (style === 'retro' || style === 'neon') {
+        shadowGroup.style.display = 'none';
+        shadowBlurGroup.style.display = 'none';
+      } else {
+        shadowGroup.style.display = 'flex';
+        shadowBlurGroup.style.display = shadowEnabled ? 'flex' : 'none';
+      }
+
+      // Fade Opacity visibility
+      if (style === 'holographic' || style === 'gold') {
+        opacityGroup.style.display = 'flex';
+      } else {
+        opacityGroup.style.display = 'none';
+      }
+
+      resizeUI();
+    }
+
+    styleSelect.addEventListener('change', updateVisibility);
+    shadowCheckbox.addEventListener('change', updateVisibility);
+
+    document.getElementById('reset-btn').onclick = () => {
+      // Restore Defaults
+      thicknessSlider.value = 12;
+      thicknessInput.value = 12;
+      styleSelect.value = 'modern';
+      shadowCheckbox.checked = true;
+      shadowBlurSlider.value = 10;
+      shadowBlurInput.value = 10;
+      opacitySlider.value = 24;
+      opacityInput.value = 24;
+
+      updateVisibility();
+      updateSliderFill(thicknessSlider);
+      updateSliderFill(opacitySlider);
+      updateSliderFill(shadowBlurSlider);
+      figma.notify("Settings reset to defaults");
+    };
+
+    updateVisibility(); // initialize on load
+
+    document.getElementById('create').onclick = () => {
+      const thickness = parseInt(document.getElementById('thickness').value, 10);
+      const shadow = shadowCheckbox.checked;
+      const shadowBlur = parseInt(shadowBlurInput.value, 10);
+      const opacity = parseInt(document.getElementById('opacity').value, 10);
+      const style = styleSelect.value;
+      parent.postMessage({ pluginMessage: { type: 'create-sticker', thickness, shadow, shadowBlur, opacity, style } }, '*');
+    }
+  </script>
+</body>
+
+</html>
