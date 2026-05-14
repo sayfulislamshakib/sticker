@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 300, height: 350 });
+figma.showUI(__html__, { width: 280, height: 350 });
 
 // Load previous settings and send to UI
 figma.clientStorage.getAsync('sticker_settings').then(settings => {
@@ -9,7 +9,7 @@ figma.clientStorage.getAsync('sticker_settings').then(settings => {
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'resize') {
-    figma.ui.resize(300, msg.height);
+    figma.ui.resize(280, msg.height);
     return;
   }
   if (msg.type === 'notify') {
@@ -18,7 +18,7 @@ figma.ui.onmessage = async (msg) => {
   }
   if (msg.type === 'create-sticker') {
     const activeSelection = figma.currentPage.selection;
-    
+
     if (activeSelection.length === 0) {
       figma.notify("Please select at least one layer to create a sticker.");
       return;
@@ -27,7 +27,7 @@ figma.ui.onmessage = async (msg) => {
     try {
       // 1. Filter out existing sticker backgrounds
       const pureSelection = activeSelection.filter(n => n.getPluginData('isSticker') !== 'true');
-      
+
       if (pureSelection.length === 0) {
         figma.notify("Please select the shapes, not just the sticker background.");
         return;
@@ -64,7 +64,7 @@ figma.ui.onmessage = async (msg) => {
         } else {
           existingStickers = i === 0 ? selectedStickers : [];
         }
-        
+
         let skipThisNode = false;
         if (existingStickers.length > 0) {
           const oldThickness = existingStickers[0].getPluginData('thickness');
@@ -72,23 +72,23 @@ figma.ui.onmessage = async (msg) => {
           const oldShadowBlur = existingStickers[0].getPluginData('shadowBlur') || '10';
           const oldOpacity = existingStickers[0].getPluginData('opacity') || '24';
           const oldStyle = existingStickers[0].getPluginData('style') || 'modern';
-          
+
           if (oldThickness === msgThickness && oldShadow === msgShadow && oldStyle === msgStyle && oldOpacity === msgOpacity && oldShadowBlur === msgShadowBlur) {
             skipThisNode = true;
           } else {
             existingStickers.forEach(s => {
-              try { s.remove(); } catch(e) {}
+              try { s.remove(); } catch (e) { }
             });
           }
         }
-        
+
         if (skipThisNode) {
           skippedCount++;
           finalSelection.push(node);
           if (existingStickers.length > 0) finalSelection.push(existingStickers[0]);
           continue;
         }
-        
+
         // 4. Calculate placement
         const targetParent = isContainer ? node : node.parent;
         let minIndex = 0;
@@ -110,12 +110,12 @@ figma.ui.onmessage = async (msg) => {
         var thickness = parseInt(msgThickness, 10);
         var physicalThickness = thickness;
         var glowSize = 0;
-        
+
         if (msgStyle === 'neon') {
           physicalThickness = Math.max(1, thickness / 2);
           glowSize = thickness / 2;
         }
-        
+
         // 6. Apply stroke and convert it to pure fill geometry
         if ('strokes' in baseVector) {
           baseVector.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
@@ -123,18 +123,18 @@ figma.ui.onmessage = async (msg) => {
           baseVector.strokeAlign = 'OUTSIDE';
           baseVector.strokeJoin = 'ROUND';
           baseVector.strokeCap = 'ROUND';
-          
+
           var outlinedStroke = null;
           try {
             outlinedStroke = baseVector.outlineStroke();
-          } catch(e) {}
-          
+          } catch (e) { }
+
           if (outlinedStroke) {
             baseVector.strokes = [];
             try {
               var merged = figma.union([baseVector, outlinedStroke], tempParent);
               var stickerBg = figma.flatten([merged]);
-            } catch(e) {
+            } catch (e) {
               var stickerBg = outlinedStroke;
             }
           } else {
@@ -142,15 +142,15 @@ figma.ui.onmessage = async (msg) => {
             var stickerBg = baseVector;
           }
         } else {
-           var stickerBg = baseVector;
+          var stickerBg = baseVector;
         }
-        
+
         // 7. Remove inner artifact paths — keep only the outermost contour
         try {
           if ('vectorPaths' in stickerBg) {
             var vPaths = stickerBg.vectorPaths;
             var allSubs = [];
-            
+
             for (var pi = 0; pi < vPaths.length; pi++) {
               var pathData = vPaths[pi].data;
               var rule = vPaths[pi].windingRule;
@@ -173,9 +173,9 @@ figma.ui.onmessage = async (msg) => {
                 allSubs.push({ data: part, area: area, rule: rule });
               }
             }
-            
-            allSubs.sort(function(a, b) { return b.area - a.area; });
-            
+
+            allSubs.sort(function (a, b) { return b.area - a.area; });
+
             if (allSubs.length > 0) {
               stickerBg.vectorPaths = [{ windingRule: allSubs[0].rule, data: allSubs[0].data }];
             }
@@ -183,9 +183,9 @@ figma.ui.onmessage = async (msg) => {
         } catch (e) {
           // If cleanup fails, continue with the full shape
         }
-        
+
         stickerBg.name = "Sticker Background";
-        
+
         // 8. Store properties and apply styles
         stickerBg.setPluginData('isSticker', 'true');
         stickerBg.setPluginData('thickness', msgThickness);
@@ -193,7 +193,7 @@ figma.ui.onmessage = async (msg) => {
         stickerBg.setPluginData('shadowBlur', msgShadowBlur);
         stickerBg.setPluginData('opacity', msgOpacity);
         stickerBg.setPluginData('style', msgStyle);
-        
+
         // Extract dominant color from selection to use in styles
         var dominantColor = { r: 0, g: 1, b: 1 };
         function extractColor(nodes) {
@@ -223,10 +223,10 @@ figma.ui.onmessage = async (msg) => {
           }
           return backupColor;
         }
-        
+
         var extracted = extractColor([node]);
         if (extracted) { dominantColor = extracted; }
-        
+
         // Apply Fills and Strokes based on Style
         if ('strokes' in stickerBg) stickerBg.strokes = [];
         if ('effects' in stickerBg) stickerBg.effects = [];
@@ -241,7 +241,7 @@ figma.ui.onmessage = async (msg) => {
               var g = dominantColor.g;
               var b = dominantColor.b;
               var mixRatio = 0.4;
-              
+
               function blend(cR, cG, cB) {
                 return {
                   r: Math.min(1, r * (1 - mixRatio) + cR * mixRatio),
@@ -312,14 +312,14 @@ figma.ui.onmessage = async (msg) => {
               break;
           }
         }
-        
+
         // Apply Effects
         var effects = [];
 
         if (msgStyle === 'neon') {
           var neonC = { r: dominantColor.r, g: dominantColor.g, b: dominantColor.b };
           var max = Math.max(neonC.r, neonC.g, neonC.b);
-          
+
           if (max < 0.2) {
             neonC = { r: 0, g: 1, b: 1 };
           } else {
@@ -391,7 +391,7 @@ figma.ui.onmessage = async (msg) => {
         }
 
         if ('effects' in stickerBg) stickerBg.effects = effects;
-        
+
         // 9. Insert and adjust positioning
         try {
           targetParent.insertChild(minIndex, stickerBg);
@@ -399,7 +399,7 @@ figma.ui.onmessage = async (msg) => {
           if ('layoutMode' in targetParent && targetParent.layoutMode !== 'NONE') {
             stickerBg.layoutPositioning = 'ABSOLUTE';
           }
-          
+
           if (isContainer && targetParent.type !== 'GROUP') {
             stickerBg.x -= targetParent.x;
             stickerBg.y -= targetParent.y;
@@ -408,20 +408,20 @@ figma.ui.onmessage = async (msg) => {
           if ('clipsContent' in targetParent) {
             targetParent.clipsContent = false;
           }
-        } catch(e) {
+        } catch (e) {
           stickerBg.remove();
           continue;
         }
-        
+
         finalSelection.push(stickerBg);
         finalSelection.push(node);
         processedCount++;
       }
-      
+
       if (finalSelection.length > 0) {
         figma.currentPage.selection = finalSelection;
       }
-      
+
       if (processedCount > 0) {
         figma.notify(processedCount === 1 ? "Sticker created successfully!" : `${processedCount} stickers created successfully!`);
       } else if (skippedCount > 0) {
