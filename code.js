@@ -1,8 +1,19 @@
 figma.showUI(__html__, { width: 300, height: 350 });
 
+// Load previous settings and send to UI
+figma.clientStorage.getAsync('sticker_settings').then(settings => {
+  if (settings) {
+    figma.ui.postMessage({ type: 'load-settings', settings });
+  }
+});
+
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'resize') {
     figma.ui.resize(300, msg.height);
+    return;
+  }
+  if (msg.type === 'notify') {
+    figma.notify(msg.message);
     return;
   }
   if (msg.type === 'create-sticker') {
@@ -29,6 +40,15 @@ figma.ui.onmessage = async (msg) => {
       const msgShadowBlur = String(msg.shadowBlur !== undefined ? msg.shadowBlur : 10);
       const msgOpacity = String(msg.opacity !== undefined ? msg.opacity : 24);
       const msgStyle = msg.style || 'modern';
+
+      // Save user settings for next time
+      figma.clientStorage.setAsync('sticker_settings', {
+        thickness: msg.thickness,
+        shadow: msg.shadow,
+        shadowBlur: msg.shadowBlur,
+        opacity: msg.opacity,
+        style: msg.style
+      });
 
       // 3. Find and manage existing stickers
       const searchSpace = isContainer ? pureSelection[0].children : activeSelection;

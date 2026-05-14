@@ -247,6 +247,35 @@
     const thicknessInput = document.getElementById('thickness');
     const thicknessSlider = document.getElementById('thickness-slider');
 
+    onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg && msg.type === 'load-settings') {
+        const s = msg.settings;
+        if (s.thickness !== undefined) {
+          thicknessSlider.value = s.thickness;
+          thicknessInput.value = s.thickness;
+        }
+        if (s.style !== undefined) {
+          styleSelect.value = s.style;
+        }
+        if (s.shadow !== undefined) {
+          shadowCheckbox.checked = s.shadow;
+        }
+        if (s.shadowBlur !== undefined) {
+          shadowBlurSlider.value = s.shadowBlur;
+          shadowBlurInput.value = s.shadowBlur;
+        }
+        if (s.opacity !== undefined) {
+          opacitySlider.value = s.opacity;
+          opacityInput.value = s.opacity;
+        }
+        updateVisibility();
+        updateSliderFill(thicknessSlider);
+        updateSliderFill(opacitySlider);
+        updateSliderFill(shadowBlurSlider);
+      }
+    };
+
     function updateSliderFill(slider) {
       const min = slider.min || 0;
       const max = slider.max || 100;
@@ -344,7 +373,7 @@
       updateSliderFill(thicknessSlider);
       updateSliderFill(opacitySlider);
       updateSliderFill(shadowBlurSlider);
-      figma.notify("Settings reset to defaults");
+      parent.postMessage({ pluginMessage: { type: 'notify', message: "Settings reset to defaults" } }, '*');
     };
 
     updateVisibility(); // initialize on load
