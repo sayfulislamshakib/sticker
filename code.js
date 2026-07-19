@@ -186,6 +186,11 @@ figma.ui.onmessage = async (msg) => {
 
         stickerBg.name = "Sticker Background";
 
+        // Set constraints to Scale on both axes
+        if ('constraints' in stickerBg) {
+          stickerBg.constraints = { horizontal: 'SCALE', vertical: 'SCALE' };
+        }
+
         // 8. Store properties and apply styles
         stickerBg.setPluginData('isSticker', 'true');
         stickerBg.setPluginData('thickness', msgThickness);
